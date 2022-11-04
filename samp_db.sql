@@ -67,7 +67,7 @@ BEGIN
 end $
 delimiter ;
 
-call `runs_all_season`('MS Dhoni');
+call `runs_all_season`('RV Uthappa');
 
 
 --Percentage of matches won in case of chase 
