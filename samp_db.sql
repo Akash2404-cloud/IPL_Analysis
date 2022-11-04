@@ -75,6 +75,30 @@ select (count(*) * 100) / (select count(*) from `ipl matches 2008-2020`)  as Cha
 from `ipl matches 2008-2020` where toss_decision = 'field' and winner = team1;
 
 
+-- Count of matches decided by D/L rule in seasons
+select year(date) as season , count(*) from `ipl matches 2008-2020` 
+where method = 'D/L' group by season;
+
+--Orange cap per season
+with tb1 as 
+(select cast(date as year) as season , batsman , sum(batsman_runs) as totalRuns 
+from `ipl_ball_by_ball` tb1 join `ipl matches 2008-2020` tb2 on tb1.id = tb2.id
+group by season , batsman order by totalRuns desc),
+tb2 as
+(select * , rank() over(partition by season order by totalRuns desc) as rnk
+from tb1)
+select season , batsman , totalRuns from tb2 where rnk = 1;
+
+-- Purple cap per season
+with tb1 as 
+(select cast(date as year) as season , bowler , sum(is_wicket) as total_wickets 
+from `ipl_ball_by_ball` tb1 join `ipl matches 2008-2020` tb2 on tb1.id = tb2.id
+where not `dismissal_kind` in ('retired hurt' , 'stumped' , 'hit wicket' ,'obstructing the field') 
+group by season , bowler order by total_wickets desc),
+tb2 as
+(select * , rank() over(partition by season order by total_wickets desc) as rnk
+from tb1)
+select season , bowler , total_wickets from tb2 where rnk = 1;
 
 
 SELECT * FROM `ipl matches 2008-2020`;
